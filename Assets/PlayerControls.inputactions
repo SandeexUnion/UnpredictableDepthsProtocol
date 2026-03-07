@@ -26,8 +26,17 @@
                 },
                 {
                     "name": "MouseRotation",
-                    "type": "Button",
+                    "type": "Value",
                     "id": "7f9c46aa-0cda-452c-a7dd-43e4c0c9e6c2",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Run",
+                    "type": "Button",
+                    "id": "c48ee475-c371-4be7-a662-b199ca6d0474",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -126,11 +135,33 @@
                 {
                     "name": "",
                     "id": "c34ac5ec-7957-467e-af1d-584839d494fd",
-                    "path": "",
+                    "path": "<Mouse>/delta",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
                     "action": "MouseRotation",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a3171aae-16e1-4f71-a341-0dd5f14416da",
+                    "path": "<Keyboard>/shift",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Run",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c1b8d3cf-42dc-4367-945c-695c5b30dbcb",
+                    "path": "<Gamepad>/leftTrigger",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Run",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

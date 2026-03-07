@@ -131,6 +131,7 @@ GameObject:
   - component: {fileID: 330585545}
   - component: {fileID: 330585544}
   - component: {fileID: 330585547}
+  - component: {fileID: 330585548}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -256,6 +257,22 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
+--- !u!114 &330585548
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 330585543}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 01564e6588bdc517b92748af69efccad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CameraController
+  mouseSensitivity: 10
+  invertY: 0
+  maxLookAngle: 90
+  playerBody: {fileID: 701514692}
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
@@ -462,6 +479,38 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: 4044c000-c09a-45bb-b985-806dbcc02857
     m_ActionName: 'GamePlay/Jump[/Keyboard/space]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 330585548}
+        m_TargetAssemblyTypeName: CameraController, Assembly-CSharp
+        m_MethodName: OnLook
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 7f9c46aa-0cda-452c-a7dd-43e4c0c9e6c2
+    m_ActionName: 'GamePlay/MouseRotation[/Mouse/delta]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 701514687}
+        m_TargetAssemblyTypeName: PlayerMovingController, Assembly-CSharp
+        m_MethodName: OnRun
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: c48ee475-c371-4be7-a662-b199ca6d0474
+    m_ActionName: 'GamePlay/Run[/Keyboard/shift]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: GamePlay
@@ -479,9 +528,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b121da8e6e1c5eab7a7540b209bf72c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovingController
-  speed: 5
+  walkSpeed: 5
+  runSpeed: 8
   jumpHeight: 2
   gravity: -9.81
+  maxStamina: 100
+  staminaDrainRate: 20
+  staminaRegenRate: 15
 --- !u!143 &701514688
 CharacterController:
   m_ObjectHideFlags: 0
