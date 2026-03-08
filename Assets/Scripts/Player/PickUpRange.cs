@@ -2,15 +2,21 @@ using UnityEngine;
 
 public class PickUpRange : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    [SerializeField] InventoryController inventoryController;
+
+    private void OnTriggerEnter(Collider other)
     {
-        
+        Item item = other.GetComponent<Item>();
+        if (item != null)
+        {
+            Debug.Log("Item in range: " + item.Name);
+            inventoryController.AddNewItem(item);
+            Destroy(other.gameObject); // Теперь это безопасно!
+        }
     }
 
-    // Update is called once per frame
-    void Update()
+    void Start()
     {
-        
+        inventoryController = FindAnyObjectByType<InventoryController>();
     }
 }
