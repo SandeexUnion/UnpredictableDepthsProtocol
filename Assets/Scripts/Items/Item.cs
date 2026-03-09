@@ -11,6 +11,13 @@ public class Item :  MonoBehaviour, IItem
     public bool CanBePass { get; set; }
     string IItem.Name { get; set ; }
 
+    public void SetData(ItemData data)
+    {
+        itemName = data.Name;
+        itemIcon = data.Icon;
+        Descriptions = data.Description;
+        CanBePass = data.CanBePass;
+    }
     public void Drop()
     {
         

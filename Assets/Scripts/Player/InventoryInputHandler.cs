@@ -18,4 +18,10 @@ public class InventoryInputHandler : MonoBehaviour
             Debug.Log($"Selected slot {slotIndex + 1} (value: {value})");
         }
     }
+    public void OnItemDrop(InputAction.CallbackContext context)
+    {
+        if (!context.performed) return;
+        inventoryController?.DropItem();
+        Debug.Log("Dropped selected item");
+    }
 }

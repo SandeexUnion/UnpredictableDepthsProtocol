@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 
@@ -21,6 +22,13 @@ public class ItemData
     }
 }
 
+[Serializable]
+public class ItemPrefabPair
+{
+    public string itemName;
+    public GameObject prefab;
+}
+
 [System.Serializable]
 public class InventorySlot
 {
@@ -34,6 +42,10 @@ public class InventorySlot
 
 public class InventoryController : MonoBehaviour
 {
+    [SerializeField] private List<ItemPrefabPair> itemPrefabs; // Список пар имя-префаб
+    [SerializeField] private float dropDistance = 2f;
+    [SerializeField] private float dropHeight = 1f;
+
     [SerializeField] private InventorySlot[] inventorySlots;
     public event Action OnInventoryChanged;
 
@@ -152,9 +164,44 @@ public class InventoryController : MonoBehaviour
     {
         if (!inventorySlots[selectedSlotIndex].IsEmpty)
         {
-            Debug.Log($"Dropping {inventorySlots[selectedSlotIndex].item.Name}");
-            // Add spawn item in world logic here
+            ItemData itemData = inventorySlots[selectedSlotIndex].item;
+            Debug.Log($"Dropping {itemData.Name}");
+
+            // Находим префаб по имени
+            GameObject prefab = GetPrefabByName(itemData.Name);
+
+            if (prefab != null)
+            {
+                // Позиция для спавна перед персонажем
+                Vector3 spawnPosition = transform.position + transform.forward * dropDistance + Vector3.up * dropHeight;
+
+                // Спавним предмет
+                GameObject droppedItem = Instantiate(prefab, spawnPosition, Quaternion.identity);
+
+                // Добавляем небольшую случайную ротацию
+                droppedItem.transform.rotation = Quaternion.Euler(0, UnityEngine.Random.Range(0, 360), 0);
+
+                // Можно добавить физический импульс для реализма
+                if (droppedItem.TryGetComponent<Rigidbody>(out Rigidbody rb))
+                {
+                    rb.AddForce(transform.forward * 2f + Vector3.up * 1f, ForceMode.Impulse);
+                }
+            }
+
             RemoveItem(selectedSlotIndex);
         }
+    }
+
+    private GameObject GetPrefabByName(string itemName)
+    {
+        foreach (var pair in itemPrefabs)
+        {
+            if (pair.itemName == itemName)
+            {
+                return pair.prefab;
+            }
+        }
+        Debug.LogWarning($"Prefab for item '{itemName}' not found!");
+        return null;
     }
 }
