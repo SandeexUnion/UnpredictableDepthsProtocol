@@ -45,6 +45,7 @@ public class InventoryController : MonoBehaviour
     [SerializeField] private List<ItemPrefabPair> itemPrefabs; // Список пар имя-префаб
     [SerializeField] private float dropDistance = 2f;
     [SerializeField] private float dropHeight = 1f;
+    [SerializeField] private GameObject pickaxe;
 
     [SerializeField] private InventorySlot[] inventorySlots;
     public event Action OnInventoryChanged;
@@ -75,7 +76,6 @@ public class InventoryController : MonoBehaviour
         }
     }
 
-    // Удаляем Update метод - теперь ввод обрабатывается через Input System
 
     public void SelectSlot(int index)
     {
@@ -103,9 +103,19 @@ public class InventoryController : MonoBehaviour
     {
         // Создаем данные предмета из компонента
         ItemData itemData = new ItemData(item);
+        
+            if (item.Name == "pickaxe")
+            {
+                pickaxe.SetActive(true);
+                inventorySlots[0].item = itemData; // Сохраняем данные, а не ссылку
+            inventorySlots[0].currentAmount = 1;
 
+            OnInventoryChanged?.Invoke();
+                return;
+            }
+        
         // First try to stack with existing items
-        for (int i = 0; i < inventorySlots.Length; i++)
+        for (int i = 1; i < inventorySlots.Length; i++)
         {
             if (!inventorySlots[i].IsEmpty &&
                 inventorySlots[i].item.Name == itemData.Name &&
@@ -118,7 +128,7 @@ public class InventoryController : MonoBehaviour
         }
 
         // Then try to find empty slot
-        for (int i = 0; i < inventorySlots.Length; i++)
+        for (int i = 1; i < inventorySlots.Length; i++)
         {
             if (inventorySlots[i].IsEmpty)
             {
@@ -172,6 +182,7 @@ public class InventoryController : MonoBehaviour
 
             if (prefab != null)
             {
+                
                 // Позиция для спавна перед персонажем
                 Vector3 spawnPosition = transform.position + transform.forward * dropDistance + Vector3.up * dropHeight;
 
@@ -180,7 +191,15 @@ public class InventoryController : MonoBehaviour
 
                 // Добавляем небольшую случайную ротацию
                 droppedItem.transform.rotation = Quaternion.Euler(0, UnityEngine.Random.Range(0, 360), 0);
-
+                
+                    droppedItem.GetComponent<Animator>().enabled = false;
+                    
+                        if (SelectedItem.Name == "pickaxe")
+                        {
+                            pickaxe.SetActive(false);
+                        }
+                    
+                
                 // Можно добавить физический импульс для реализма
                 if (droppedItem.TryGetComponent<Rigidbody>(out Rigidbody rb))
                 {
@@ -202,6 +221,18 @@ public class InventoryController : MonoBehaviour
             }
         }
         Debug.LogWarning($"Prefab for item '{itemName}' not found!");
+        return null;
+    }
+    public GameObject GetPrefabOfSelectedWeapon()
+    {
+        
+            if(SelectedItem.Name == "pickaxe")
+            {
+                return pickaxe;
+        }
+        
+        
+        Debug.LogWarning($"Prefab for item '{SelectedItem.Name}' not found!");
         return null;
     }
 }
