@@ -12,7 +12,7 @@ public class ItemData
     public string Description;
     public bool CanBePass;
 
-    // Конструктор для создания из Item компонента
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ Item пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     public ItemData(Item item)
     {
         Name = item.Name;
@@ -32,7 +32,7 @@ public class ItemPrefabPair
 [System.Serializable]
 public class InventorySlot
 {
-    public ItemData item; // Изменено с Item на ItemData
+    public ItemData item; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ Item пїЅпїЅ ItemData
     public int maxStack;
     public int currentAmount;
 
@@ -42,7 +42,7 @@ public class InventorySlot
 
 public class InventoryController : MonoBehaviour
 {
-    [SerializeField] private List<ItemPrefabPair> itemPrefabs; // Список пар имя-префаб
+    [SerializeField] private List<ItemPrefabPair> itemPrefabs; // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅ-пїЅпїЅпїЅпїЅпїЅпїЅ
     [SerializeField] private float dropDistance = 2f;
     [SerializeField] private float dropHeight = 1f;
     [SerializeField] private GameObject pickaxe;
@@ -101,13 +101,13 @@ public class InventoryController : MonoBehaviour
 
     public void AddNewItem(Item item)
     {
-        // Создаем данные предмета из компонента
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         ItemData itemData = new ItemData(item);
         
             if (item.Name == "pickaxe")
             {
                 pickaxe.SetActive(true);
-                inventorySlots[0].item = itemData; // Сохраняем данные, а не ссылку
+                inventorySlots[0].item = itemData; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ, пїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
             inventorySlots[0].currentAmount = 1;
 
             OnInventoryChanged?.Invoke();
@@ -132,7 +132,7 @@ public class InventoryController : MonoBehaviour
         {
             if (inventorySlots[i].IsEmpty)
             {
-                inventorySlots[i].item = itemData; // Сохраняем данные, а не ссылку
+                inventorySlots[i].item = itemData; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ, пїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
                 inventorySlots[i].currentAmount = 1;
                 OnInventoryChanged?.Invoke();
                 return;
@@ -177,30 +177,31 @@ public class InventoryController : MonoBehaviour
             ItemData itemData = inventorySlots[selectedSlotIndex].item;
             Debug.Log($"Dropping {itemData.Name}");
 
-            // Находим префаб по имени
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
             GameObject prefab = GetPrefabByName(itemData.Name);
 
             if (prefab != null)
             {
                 
-                // Позиция для спавна перед персонажем
+                // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
                 Vector3 spawnPosition = transform.position + transform.forward * dropDistance + Vector3.up * dropHeight;
 
-                // Спавним предмет
+                // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
                 GameObject droppedItem = Instantiate(prefab, spawnPosition, Quaternion.identity);
 
-                // Добавляем небольшую случайную ротацию
+                // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
                 droppedItem.transform.rotation = Quaternion.Euler(0, UnityEngine.Random.Range(0, 360), 0);
                 
-                    droppedItem.GetComponent<Animator>().enabled = false;
+                    
                     
                         if (SelectedItem.Name == "pickaxe")
                         {
+                            droppedItem.GetComponent<Animator>().enabled = false;
                             pickaxe.SetActive(false);
                         }
                     
                 
-                // Можно добавить физический импульс для реализма
+                // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
                 if (droppedItem.TryGetComponent<Rigidbody>(out Rigidbody rb))
                 {
                     rb.AddForce(transform.forward * 2f + Vector3.up * 1f, ForceMode.Impulse);
