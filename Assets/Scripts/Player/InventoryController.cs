@@ -2,8 +2,6 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-
-
 [System.Serializable]
 public class ItemData
 {
@@ -12,7 +10,6 @@ public class ItemData
     public string Description;
     public bool CanBePass;
 
-    // ����������� ��� �������� �� Item ����������
     public ItemData(Item item)
     {
         Name = item.Name;
@@ -32,7 +29,7 @@ public class ItemPrefabPair
 [System.Serializable]
 public class InventorySlot
 {
-    public ItemData item; // �������� � Item �� ItemData
+    public ItemData item;
     public int maxStack;
     public int currentAmount;
 
@@ -42,7 +39,7 @@ public class InventorySlot
 
 public class InventoryController : MonoBehaviour
 {
-    [SerializeField] private List<ItemPrefabPair> itemPrefabs; // ������ ��� ���-������
+    [SerializeField] private List<ItemPrefabPair> itemPrefabs;
     [SerializeField] private float dropDistance = 2f;
     [SerializeField] private float dropHeight = 1f;
     [SerializeField] private GameObject pickaxe;
@@ -52,15 +49,11 @@ public class InventoryController : MonoBehaviour
 
     private int selectedSlotIndex = 0;
 
-    // Public property to get selected slot
     public int SelectedSlotIndex => selectedSlotIndex;
-
-    // Public property to get selected item
     public ItemData SelectedItem => inventorySlots[selectedSlotIndex].item;
 
     void Start()
     {
-        // Initialize inventory slots if not set in inspector
         if (inventorySlots == null || inventorySlots.Length == 0)
         {
             inventorySlots = new InventorySlot[10];
@@ -74,8 +67,13 @@ public class InventoryController : MonoBehaviour
                 };
             }
         }
-    }
 
+        // Убедимся, что кирка изначально выключена
+        if (pickaxe != null)
+        {
+            pickaxe.SetActive(false);
+        }
+    }
 
     public void SelectSlot(int index)
     {
@@ -84,16 +82,31 @@ public class InventoryController : MonoBehaviour
             int previousSlot = selectedSlotIndex;
             selectedSlotIndex = index;
 
-            // Only invoke if selection actually changed
             if (previousSlot != selectedSlotIndex)
             {
+                UpdatePickaxeVisibility();
                 OnInventoryChanged?.Invoke();
                 Debug.Log($"Selected slot: {selectedSlotIndex + 1}");
             }
         }
     }
 
-    // Public method to get inventory slots
+    private void UpdatePickaxeVisibility()
+    {
+        if (pickaxe == null) return;
+
+        // Проверяем, выбран ли слот с киркой и есть ли там предмет
+        if (!inventorySlots[selectedSlotIndex].IsEmpty &&
+            inventorySlots[selectedSlotIndex].item.Name == "pickaxe")
+        {
+            pickaxe.SetActive(true);
+        }
+        else
+        {
+            pickaxe.SetActive(false);
+        }
+    }
+
     public InventorySlot[] GetInventorySlots()
     {
         return inventorySlots;
@@ -101,19 +114,32 @@ public class InventoryController : MonoBehaviour
 
     public void AddNewItem(Item item)
     {
-        // ������� ������ �������� �� ����������
         ItemData itemData = new ItemData(item);
-        
-            if (item.Name == "pickaxe")
-            {
-                pickaxe.SetActive(true);
-                inventorySlots[0].item = itemData; // ��������� ������, � �� ������
-            inventorySlots[0].currentAmount = 1;
 
-            OnInventoryChanged?.Invoke();
-                return;
+        if (item.Name == "pickaxe")
+        {
+            // Кладем кирку в инвентарь
+            for (int i = 0; i < inventorySlots.Length; i++)
+            {
+                if (inventorySlots[i].IsEmpty)
+                {
+                    inventorySlots[i].item = itemData;
+                    inventorySlots[i].currentAmount = 1;
+
+                    // Если это первый слот и он выбран, показываем кирку
+                    if (i == selectedSlotIndex)
+                    {
+                        UpdatePickaxeVisibility();
+                    }
+
+                    OnInventoryChanged?.Invoke();
+                    return;
+                }
             }
-        
+            Debug.Log("Inventory is full!");
+            return;
+        }
+
         // First try to stack with existing items
         for (int i = 1; i < inventorySlots.Length; i++)
         {
@@ -132,7 +158,7 @@ public class InventoryController : MonoBehaviour
         {
             if (inventorySlots[i].IsEmpty)
             {
-                inventorySlots[i].item = itemData; // ��������� ������, � �� ������
+                inventorySlots[i].item = itemData;
                 inventorySlots[i].currentAmount = 1;
                 OnInventoryChanged?.Invoke();
                 return;
@@ -153,6 +179,12 @@ public class InventoryController : MonoBehaviour
                 if (inventorySlots[slotIndex].currentAmount <= 0)
                 {
                     inventorySlots[slotIndex].item = null;
+
+                    // Если удалили предмет из выбранного слота, обновляем видимость кирки
+                    if (slotIndex == selectedSlotIndex)
+                    {
+                        UpdatePickaxeVisibility();
+                    }
                 }
 
                 OnInventoryChanged?.Invoke();
@@ -165,7 +197,6 @@ public class InventoryController : MonoBehaviour
         if (!inventorySlots[selectedSlotIndex].IsEmpty)
         {
             Debug.Log($"Using {inventorySlots[selectedSlotIndex].item.Name}");
-            // Add usage logic here
             RemoveItem(selectedSlotIndex);
         }
     }
@@ -177,31 +208,20 @@ public class InventoryController : MonoBehaviour
             ItemData itemData = inventorySlots[selectedSlotIndex].item;
             Debug.Log($"Dropping {itemData.Name}");
 
-            // ������� ������ �� �����
             GameObject prefab = GetPrefabByName(itemData.Name);
 
             if (prefab != null)
             {
-                
-                // ������� ��� ������ ����� ����������
                 Vector3 spawnPosition = transform.position + transform.forward * dropDistance + Vector3.up * dropHeight;
-
-                // ������� �������
                 GameObject droppedItem = Instantiate(prefab, spawnPosition, Quaternion.identity);
-
-                // ��������� ��������� ��������� �������
                 droppedItem.transform.rotation = Quaternion.Euler(0, UnityEngine.Random.Range(0, 360), 0);
-                
-                    
-                    
-                        if (SelectedItem.Name == "pickaxe")
-                        {
-                            droppedItem.GetComponent<Animator>().enabled = false;
-                            pickaxe.SetActive(false);
-                        }
-                    
-                
-                // ����� �������� ���������� ������� ��� ��������
+
+                // Отключаем аниматор если есть
+                if (droppedItem.TryGetComponent<Animator>(out Animator anim))
+                {
+                    anim.enabled = false;
+                }
+
                 if (droppedItem.TryGetComponent<Rigidbody>(out Rigidbody rb))
                 {
                     rb.AddForce(transform.forward * 2f + Vector3.up * 1f, ForceMode.Impulse);
@@ -224,16 +244,16 @@ public class InventoryController : MonoBehaviour
         Debug.LogWarning($"Prefab for item '{itemName}' not found!");
         return null;
     }
+
     public GameObject GetPrefabOfSelectedWeapon()
     {
-        
-            if(SelectedItem.Name == "pickaxe")
-            {
-                return pickaxe;
+        if (!inventorySlots[selectedSlotIndex].IsEmpty &&
+            SelectedItem.Name == "pickaxe")
+        {
+            return pickaxe;
         }
-        
-        
-        Debug.LogWarning($"Prefab for item '{SelectedItem.Name}' not found!");
+
+        Debug.LogWarning($"Prefab for item '{SelectedItem?.Name}' not found!");
         return null;
     }
 }
