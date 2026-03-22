@@ -8,5 +8,6 @@ public interface IResourceble : IItem{
 public enum ResourceType{
     Fuel,
     Metal,
-    Mineral
+    Mineral,
+    None
 }

@@ -9,6 +9,7 @@ public class ItemData
     public Sprite Icon;
     public string Description;
     public bool CanBePass;
+    private Item item;
 
     public ItemData(Item item)
     {
@@ -16,6 +17,11 @@ public class ItemData
         Icon = item.Icon;
         Description = item.Descriptions;
         CanBePass = item.CanBePass;
+        this.item = item;
+    }
+    public Item GetItem()
+    {
+        return item;
     }
 }
 
@@ -43,6 +49,8 @@ public class InventoryController : MonoBehaviour
     [SerializeField] private float dropDistance = 2f;
     [SerializeField] private float dropHeight = 1f;
     [SerializeField] private GameObject pickaxe;
+    [SerializeField] private GameObject coal;
+    [SerializeField] private GameObject iron;
 
     [SerializeField] private InventorySlot[] inventorySlots;
     public event Action OnInventoryChanged;
@@ -73,6 +81,15 @@ public class InventoryController : MonoBehaviour
         {
             pickaxe.SetActive(false);
         }
+        if (coal != null)
+        {
+            coal.SetActive(false);
+        }
+        if (iron != null)
+        {
+            iron.SetActive(false);
+        }
+
     }
 
     public void SelectSlot(int index)
@@ -84,26 +101,43 @@ public class InventoryController : MonoBehaviour
 
             if (previousSlot != selectedSlotIndex)
             {
-                UpdatePickaxeVisibility();
+                UpdateItemVisibility(); // Убираем параметр
                 OnInventoryChanged?.Invoke();
                 Debug.Log($"Selected slot: {selectedSlotIndex + 1}");
             }
         }
     }
 
-    private void UpdatePickaxeVisibility()
+    private void UpdateItemVisibility()
     {
-        if (pickaxe == null) return;
+        // Сначала выключаем все предметы
+        if (pickaxe != null) pickaxe.SetActive(false);
+        if (coal != null) coal.SetActive(false);
+        if (iron != null) iron.SetActive(false);
 
-        // Проверяем, выбран ли слот с киркой и есть ли там предмет
-        if (!inventorySlots[selectedSlotIndex].IsEmpty &&
-            inventorySlots[selectedSlotIndex].item.Name == "pickaxe")
+        // Если слот пуст, ничего не включаем
+        if (inventorySlots[selectedSlotIndex].IsEmpty)
+            return;
+
+        // Включаем нужный предмет в зависимости от его имени
+        string itemName = inventorySlots[selectedSlotIndex].item.Name;
+
+        switch (itemName)
         {
-            pickaxe.SetActive(true);
-        }
-        else
-        {
-            pickaxe.SetActive(false);
+            case "pickaxe":
+                if (pickaxe != null)
+                    pickaxe.SetActive(true);
+                break;
+
+            case "Coal":
+                if (coal != null)
+                    coal.SetActive(true);
+                break;
+
+            case "Iron":
+                if (iron != null)
+                    iron.SetActive(true);
+                break;
         }
     }
 
@@ -129,7 +163,7 @@ public class InventoryController : MonoBehaviour
                     // Если это первый слот и он выбран, показываем кирку
                     if (i == selectedSlotIndex)
                     {
-                        UpdatePickaxeVisibility();
+                        UpdateItemVisibility(); // Убираем параметр
                     }
 
                     OnInventoryChanged?.Invoke();
@@ -180,10 +214,10 @@ public class InventoryController : MonoBehaviour
                 {
                     inventorySlots[slotIndex].item = null;
 
-                    // Если удалили предмет из выбранного слота, обновляем видимость кирки
+                    // Если удалили предмет из выбранного слота, обновляем видимость
                     if (slotIndex == selectedSlotIndex)
                     {
-                        UpdatePickaxeVisibility();
+                        UpdateItemVisibility(); // Убираем параметр
                     }
                 }
 
@@ -199,6 +233,19 @@ public class InventoryController : MonoBehaviour
             Debug.Log($"Using {inventorySlots[selectedSlotIndex].item.Name}");
             RemoveItem(selectedSlotIndex);
         }
+    }
+    public Item GetSelectedItem()
+    {
+        if (!inventorySlots[selectedSlotIndex].IsEmpty && inventorySlots[selectedSlotIndex].item != null)
+        {
+            return inventorySlots[selectedSlotIndex].item.GetItem();
+        }
+        return null;
+    }
+    // Добавьте этот метод в класс InventoryController
+    public int GetSelectedSlotIndex()
+    {
+        return selectedSlotIndex;
     }
 
     public void DropItem()

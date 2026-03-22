@@ -2,11 +2,10 @@ using UnityEngine;
 
 public class Item :  MonoBehaviour, IItem
 {
-    [SerializeField] private string itemName;
-    [SerializeField] private Sprite itemIcon;
+    [SerializeField] public string itemName;
+    [SerializeField] public Sprite itemIcon;
     public string Name => itemName;
     public Sprite Icon => itemIcon;
-
     public string Descriptions { get; set; }
     public bool CanBePass { get; set; }
     string IItem.Name { get; set ; }

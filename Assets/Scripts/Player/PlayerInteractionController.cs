@@ -42,10 +42,18 @@ public class PlayerInteractionController : MonoBehaviour
             {
                 Debug.Log($"Interacted with {hit.collider.name} at distance {hit.distance}");
                 interactable.Interact();
-                Debug.Log(animationsController==null);
-                Debug.Log(inventoryController == null);
-                Debug.Log(inventoryController.GetPrefabOfSelectedWeapon().GetComponent<Animator>() == null);
-                animationsController.ExecuteAnimationOfWeapon(inventoryController.GetPrefabOfSelectedWeapon().GetComponent<Animator>());
+                if (animationsController != null && inventoryController !=null && inventoryController.GetPrefabOfSelectedWeapon() != null)
+                {
+                    if(inventoryController.GetPrefabOfSelectedWeapon().GetComponent<Animator>() != null)
+                    {
+                        Debug.Log(animationsController == null);
+                        Debug.Log(inventoryController == null);
+                        Debug.Log(inventoryController.GetPrefabOfSelectedWeapon());
+                        animationsController.ExecuteAnimationOfWeapon(inventoryController.GetPrefabOfSelectedWeapon().GetComponent<Animator>());
+                    }
+                    
+                }
+                    
                 return;
             }
         }
