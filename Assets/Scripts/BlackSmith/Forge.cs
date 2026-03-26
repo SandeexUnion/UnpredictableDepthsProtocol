@@ -6,6 +6,7 @@ public class Forge : MonoBehaviour, IInteractable
     [SerializeField] private int maxFuelCells = 3;
     [SerializeField] private int maxOreCells = 3;
     [SerializeField] private float meltingTime = 5f;
+    [SerializeField] private Transform dropPoint;
 
     // Результаты плавки для разных комбинаций
     [System.Serializable]
@@ -284,26 +285,73 @@ public class Forge : MonoBehaviour, IInteractable
             return;
         }
 
-        // Создаем Item для результата
-        GameObject resultObject = new GameObject(recipe.resultName);
-        Item resultItem = resultObject.AddComponent<Item>();
-        resultItem.itemName = recipe.resultName;
-        resultItem.itemIcon = recipe.resultIcon;
-        resultItem.Descriptions = recipe.resultDescription;
-        resultItem.CanBePass = true;
-
-        // Добавляем результат в инвентарь
-        if (inventoryController != null)
-        {
-            inventoryController.AddNewItem(resultItem);
-            Debug.Log($"Created {recipe.resultName} and added to inventory!");
-        }
-
-        // Если есть префаб для отображения, спавним его
+        // Если есть префаб для отображения, спавним его с физикой
         if (recipe.resultPrefab != null)
         {
-            Vector3 spawnPosition = transform.position + Vector3.up * 1f;
-            Instantiate(recipe.resultPrefab, spawnPosition, Quaternion.identity);
+
+            // Создаем объект
+            GameObject droppedItem = Instantiate(recipe.resultPrefab, new Vector3(dropPoint.position.x, dropPoint.position.y, dropPoint.position.z), Quaternion.identity);
+            droppedItem.transform.rotation = Quaternion.Euler(0, UnityEngine.Random.Range(0, 15), 0);
+
+            // Добавляем компонент Item, чтобы предмет можно было подобрать
+            Item itemComponent = droppedItem.GetComponent<Item>();
+            if (itemComponent == null)
+            {
+                itemComponent = droppedItem.AddComponent<Item>();
+            }
+
+            // Настраиваем параметры предмета
+            // ВАЖНО: Убираем пробел из имени для совместимости с InventoryController
+            string itemName = recipe.resultName.Replace(" ", ""); // "IronIngot" вместо "Iron Ingot"
+            itemComponent.itemName = itemName;
+            itemComponent.itemIcon = recipe.resultIcon;
+            itemComponent.Descriptions = recipe.resultDescription;
+            itemComponent.CanBePass = true;
+
+            // Отключаем аниматор если есть
+            if (droppedItem.TryGetComponent<Animator>(out Animator anim))
+            {
+                anim.enabled = false;
+            }
+
+            // Добавляем силу для выброса
+            if (droppedItem.TryGetComponent<Rigidbody>(out Rigidbody rb))
+            {
+                // Сила выброса: вперед и немного вверх
+                Vector3 throwForce = transform.forward * 3f + Vector3.up * 3f;
+                rb.AddForce(throwForce, ForceMode.Impulse);
+
+                // Добавляем случайное вращение
+                rb.AddTorque(new Vector3(
+                    UnityEngine.Random.Range(-5f, 5f),
+                    UnityEngine.Random.Range(-5f, 5f),
+                    UnityEngine.Random.Range(-5f, 5f)
+                ), ForceMode.Impulse);
+            }
+
+            Debug.Log($"Created {itemName} and threw it out of the forge!");
+        }
+        else
+        {
+            // Если префаба нет, создаем просто Item объект
+            GameObject resultObject = new GameObject(recipe.resultName);
+            Item resultItem = resultObject.AddComponent<Item>();
+
+            // ВАЖНО: Убираем пробел из имени
+            string itemName = recipe.resultName.Replace(" ", "");
+            resultItem.itemName = itemName;
+            resultItem.itemIcon = recipe.resultIcon;
+            resultItem.Descriptions = recipe.resultDescription;
+            resultItem.CanBePass = true;
+
+            // Позиционируем и выбрасываем
+            resultObject.transform.position = transform.position + transform.forward * 2f + Vector3.up * 1f;
+
+            Rigidbody rb = resultObject.AddComponent<Rigidbody>();
+            Vector3 throwForce = transform.forward * 3f + Vector3.up * 2f;
+            rb.AddForce(throwForce, ForceMode.Impulse);
+
+            Debug.Log($"Created {itemName} and threw it out (no prefab)!");
         }
     }
 

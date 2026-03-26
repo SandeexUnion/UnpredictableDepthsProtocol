@@ -48,9 +48,11 @@ public class InventoryController : MonoBehaviour
     [SerializeField] private List<ItemPrefabPair> itemPrefabs;
     [SerializeField] private float dropDistance = 2f;
     [SerializeField] private float dropHeight = 1f;
+    [Header("Item GameObjects in hand")]
     [SerializeField] private GameObject pickaxe;
     [SerializeField] private GameObject coal;
     [SerializeField] private GameObject iron;
+    [SerializeField] private GameObject ironIngot;
 
     [SerializeField] private InventorySlot[] inventorySlots;
     public event Action OnInventoryChanged;
@@ -89,6 +91,7 @@ public class InventoryController : MonoBehaviour
         {
             iron.SetActive(false);
         }
+        if (ironIngot != null) ironIngot.SetActive(false);
 
     }
 
@@ -114,6 +117,7 @@ public class InventoryController : MonoBehaviour
         if (pickaxe != null) pickaxe.SetActive(false);
         if (coal != null) coal.SetActive(false);
         if (iron != null) iron.SetActive(false);
+        if (ironIngot != null) ironIngot.SetActive(false); // Добавляем
 
         // Если слот пуст, ничего не включаем
         if (inventorySlots[selectedSlotIndex].IsEmpty)
@@ -138,6 +142,11 @@ public class InventoryController : MonoBehaviour
                 if (iron != null)
                     iron.SetActive(true);
                 break;
+
+            case "IronIngot": // Добавляем случай для слитка железа
+                if (ironIngot != null)
+                    ironIngot.SetActive(true);
+                break;
         }
     }
 
@@ -152,7 +161,7 @@ public class InventoryController : MonoBehaviour
 
         if (item.Name == "pickaxe")
         {
-            // Кладем кирку в инвентарь
+            // Кладем кирку в инвентарь (особый случай - не стакается)
             for (int i = 0; i < inventorySlots.Length; i++)
             {
                 if (inventorySlots[i].IsEmpty)
@@ -163,7 +172,7 @@ public class InventoryController : MonoBehaviour
                     // Если это первый слот и он выбран, показываем кирку
                     if (i == selectedSlotIndex)
                     {
-                        UpdateItemVisibility(); // Убираем параметр
+                        UpdateItemVisibility();
                     }
 
                     OnInventoryChanged?.Invoke();
@@ -174,7 +183,7 @@ public class InventoryController : MonoBehaviour
             return;
         }
 
-        // First try to stack with existing items
+        // First try to stack with existing items (для стакающихся предметов)
         for (int i = 1; i < inventorySlots.Length; i++)
         {
             if (!inventorySlots[i].IsEmpty &&
@@ -269,9 +278,33 @@ public class InventoryController : MonoBehaviour
                     anim.enabled = false;
                 }
 
+                // Настройка Rigidbody для предотвращения проваливания
                 if (droppedItem.TryGetComponent<Rigidbody>(out Rigidbody rb))
                 {
+                    // Увеличиваем массу для лучшего контакта с землей
+                    rb.mass = 1f;
+
+                    // Включаем непрерывное обнаружение столкновений (важно!)
+                    rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
+
+                    // Настраиваем интерполяцию для плавного движения
+                    rb.interpolation = RigidbodyInterpolation.Interpolate;
+
+                    // Добавляем силу
                     rb.AddForce(transform.forward * 2f + Vector3.up * 1f, ForceMode.Impulse);
+                }
+
+                // Убеждаемся, что коллайдер настроен правильно
+                if (droppedItem.TryGetComponent<Collider>(out Collider col))
+                {
+                    // Проверяем, что коллайдер не триггер
+                    col.isTrigger = false;
+
+                    // Если это MeshCollider, убеждаемся что он convex
+                    if (col is MeshCollider meshCol)
+                    {
+                        meshCol.convex = true;
+                    }
                 }
             }
 
@@ -281,6 +314,7 @@ public class InventoryController : MonoBehaviour
 
     private GameObject GetPrefabByName(string itemName)
     {
+        // Сначала ищем точное совпадение
         foreach (var pair in itemPrefabs)
         {
             if (pair.itemName == itemName)
@@ -288,19 +322,43 @@ public class InventoryController : MonoBehaviour
                 return pair.prefab;
             }
         }
+
+        // Если не нашли, пробуем искать без пробелов
+        string noSpaceName = itemName.Replace(" ", "").ToLower();
+        foreach (var pair in itemPrefabs)
+        {
+            if (pair.itemName == noSpaceName)
+            {
+                Debug.Log($"Found prefab for '{itemName}' using name '{noSpaceName}'");
+                return pair.prefab;
+            }
+        }
+
         Debug.LogWarning($"Prefab for item '{itemName}' not found!");
         return null;
     }
 
     public GameObject GetPrefabOfSelectedWeapon()
     {
-        if (!inventorySlots[selectedSlotIndex].IsEmpty &&
-            SelectedItem.Name == "pickaxe")
+        if (!inventorySlots[selectedSlotIndex].IsEmpty && SelectedItem != null)
         {
-            return pickaxe;
+            switch (SelectedItem.Name)
+            {
+                case "pickaxe":
+                    return pickaxe;
+                case "Coal":
+                    return coal;
+                case "Iron":
+                    return iron;
+                case "IronIngot":
+                    return ironIngot;
+                default:
+                    Debug.LogWarning($"Prefab for item '{SelectedItem.Name}' not found!");
+                    return null;
+            }
         }
 
-        Debug.LogWarning($"Prefab for item '{SelectedItem?.Name}' not found!");
+        Debug.LogWarning($"No item selected or slot is empty!");
         return null;
     }
 }
