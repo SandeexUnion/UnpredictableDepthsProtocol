@@ -53,6 +53,7 @@ public class InventoryController : MonoBehaviour
     [SerializeField] private GameObject coal;
     [SerializeField] private GameObject iron;
     [SerializeField] private GameObject ironIngot;
+    [SerializeField] private GameObject hatchet;
 
     [SerializeField] private InventorySlot[] inventorySlots;
     public event Action OnInventoryChanged;
@@ -82,6 +83,10 @@ public class InventoryController : MonoBehaviour
         if (pickaxe != null)
         {
             pickaxe.SetActive(false);
+        }
+        if (hatchet != null)
+        {
+            hatchet.SetActive(false);
         }
         if (coal != null)
         {
@@ -115,6 +120,7 @@ public class InventoryController : MonoBehaviour
     {
         // Сначала выключаем все предметы
         if (pickaxe != null) pickaxe.SetActive(false);
+        if (hatchet != null) hatchet.SetActive(false);
         if (coal != null) coal.SetActive(false);
         if (iron != null) iron.SetActive(false);
         if (ironIngot != null) ironIngot.SetActive(false); // Добавляем
@@ -131,6 +137,10 @@ public class InventoryController : MonoBehaviour
             case "pickaxe":
                 if (pickaxe != null)
                     pickaxe.SetActive(true);
+                break;
+            case "hatchet":
+                if (hatchet != null)
+                    hatchet.SetActive(true);
                 break;
 
             case "Coal":
@@ -158,7 +168,7 @@ public class InventoryController : MonoBehaviour
     public void AddNewItem(Item item)
     {
         ItemData itemData = new ItemData(item);
-
+        UpdateItemVisibility();
         if (item.Name == "pickaxe")
         {
             // Кладем кирку в инвентарь (особый случай - не стакается)
@@ -182,9 +192,32 @@ public class InventoryController : MonoBehaviour
             Debug.Log("Inventory is full!");
             return;
         }
+        if (item.Name == "hatchet")
+        {
+            // Кладем кирку в инвентарь (особый случай - не стакается)
+            for (int i = 1; i < inventorySlots.Length; i++)
+            {
+                if (inventorySlots[i].IsEmpty)
+                {
+                    inventorySlots[i].item = itemData;
+                    inventorySlots[i].currentAmount = 1;
+
+                    // Если это второй слот и он выбран, показываем кирку
+                    if (i == selectedSlotIndex)
+                    {
+                        UpdateItemVisibility();
+                    }
+
+                    OnInventoryChanged?.Invoke();
+                    return;
+                }
+            }
+            Debug.Log("Inventory is full!");
+            return;
+        }
 
         // First try to stack with existing items (для стакающихся предметов)
-        for (int i = 1; i < inventorySlots.Length; i++)
+        for (int i = 2; i < inventorySlots.Length; i++)
         {
             if (!inventorySlots[i].IsEmpty &&
                 inventorySlots[i].item.Name == itemData.Name &&
@@ -197,7 +230,7 @@ public class InventoryController : MonoBehaviour
         }
 
         // Then try to find empty slot
-        for (int i = 1; i < inventorySlots.Length; i++)
+        for (int i = 2; i < inventorySlots.Length; i++)
         {
             if (inventorySlots[i].IsEmpty)
             {
@@ -346,6 +379,8 @@ public class InventoryController : MonoBehaviour
             {
                 case "pickaxe":
                     return pickaxe;
+                case "hatchet":
+                    return hatchet;
                 case "Coal":
                     return coal;
                 case "Iron":

@@ -10,6 +10,7 @@ public class Resource : MonoBehaviour, IResourceble
     public string Descriptions { get; set; }
     public bool CanBePass { get; set; }
     string IItem.Name { get; set; }
+    public InteractableType type { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
 
     public void Recycle()
     {

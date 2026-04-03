@@ -32,30 +32,40 @@ public class PlayerInteractionController : MonoBehaviour
         Ray ray = new Ray(point.transform.position, point.transform.forward);
         RaycastHit[] hits = Physics.RaycastAll(ray, interactDistance);
 
-        // Сортируем по дистанции
         System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+
+        // Получаем выбранный предмет
+        Item selectedItem = inventoryController?.GetSelectedItem();
 
         foreach (RaycastHit hit in hits)
         {
             IInteractable interactable = hit.collider.GetComponent<IInteractable>();
             if (interactable != null)
             {
-                Debug.Log($"Interacted with {hit.collider.name} at distance {hit.distance}");
-                interactable.Interact();
-                if (animationsController != null && inventoryController !=null && inventoryController.GetPrefabOfSelectedWeapon() != null)
+                // Проверяем совместимость
+                if (interactable.CanInteractWith(selectedItem))
                 {
-                    if(inventoryController.GetPrefabOfSelectedWeapon().GetComponent<Animator>() != null)
+                    Debug.Log($"Interacted with {hit.collider.name} using {selectedItem?.Name ?? "hands"}");
+                    interactable.Interact();
+
+                    // Анимация оружия
+                    if (animationsController != null && selectedItem.Name != null)
                     {
-                        Debug.Log(animationsController == null);
-                        Debug.Log(inventoryController == null);
-                        Debug.Log(inventoryController.GetPrefabOfSelectedWeapon());
-                        animationsController.ExecuteAnimationOfWeapon(inventoryController.GetPrefabOfSelectedWeapon().GetComponent<Animator>());
+                        GameObject weaponPrefab = inventoryController.GetPrefabOfSelectedWeapon();
+                        if (weaponPrefab != null && weaponPrefab.GetComponent<Animator>() != null)
+                        {
+                            animationsController.ExecuteAnimationOfWeapon(weaponPrefab.GetComponent<Animator>());
+                        }
                     }
-                    
+                    return;
                 }
-                    
-                return;
+                else
+                {
+                    Debug.Log($"Cannot interact with {hit.collider.name} using {selectedItem?.Name ?? "hands"}");
+                }
             }
         }
     }
+
+    
 }

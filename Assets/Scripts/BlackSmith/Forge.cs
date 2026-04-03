@@ -7,7 +7,7 @@ public class Forge : MonoBehaviour, IInteractable
     [SerializeField] private int maxOreCells = 3;
     [SerializeField] private float meltingTime = 5f;
     [SerializeField] private Transform dropPoint;
-
+    public InteractableType[] interactableTypes { get; set; } = new InteractableType[] { InteractableType.Ore, InteractableType.Fuel };
     // Результаты плавки для разных комбинаций
     [System.Serializable]
     public class SmeltingResult
@@ -61,8 +61,42 @@ public class Forge : MonoBehaviour, IInteractable
             }
         }
     }
+    public bool CanInteractWith(Item tool)
+    {
+        if (tool == null) return false;
 
-    public void Interact()
+        // Получаем тип инструмента из имени предмета
+        InteractableType toolType = GetToolType(tool.Name);
+
+        // Проверяем, есть ли этот тип в списке поддерживаемых
+        foreach (var type in interactableTypes)
+        {
+            if (type == toolType)
+                return true;
+        }
+        return false;
+    }
+
+    private InteractableType GetToolType(string itemName)
+    {
+        switch (itemName.ToLower())
+        {
+            case "iron":
+                return InteractableType.Ore;
+            case "copper":
+                return InteractableType.Ore;
+            case "gold":
+                return InteractableType.Ore;
+            case "coal":
+                return InteractableType.Fuel;
+            case "wood":
+                return InteractableType.Fuel;
+            default:
+                return InteractableType.Craftable;
+        }
+    }
+
+public void Interact()
     {
         if (isMelting)
         {
