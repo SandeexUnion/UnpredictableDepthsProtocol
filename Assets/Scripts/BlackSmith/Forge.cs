@@ -3,9 +3,7 @@ using UnityEngine;
 public class Forge : MonoBehaviour, IInteractable
 {
     [SerializeField] private InventoryController inventoryController;
-    [SerializeField] private int maxFuelCells = 3;
-    [SerializeField] private int maxOreCells = 3;
-    [SerializeField] private float meltingTime = 5f;
+    [SerializeField] private SmeltingConfigSO config;
     [SerializeField] private Transform dropPoint;
     public InteractableType[] interactableTypes { get; set; } = new InteractableType[] { InteractableType.Ore, InteractableType.Fuel };
     // Результаты плавки для разных комбинаций
@@ -43,10 +41,10 @@ public class Forge : MonoBehaviour, IInteractable
 
     void Start()
     {
-        fuelCells = new int[maxFuelCells];
-        oreCells = new int[maxOreCells];
-        fuelTypes = new string[maxFuelCells];
-        oreTypes = new string[maxOreCells];
+        fuelCells = new int[config.maxFuelCells];
+        oreCells = new int[config.maxOreCells];
+        fuelTypes = new string[config.maxFuelCells];
+        oreTypes = new string[config.maxOreCells];
     }
 
     void Update()
@@ -55,7 +53,7 @@ public class Forge : MonoBehaviour, IInteractable
         {
             currentMeltingTime += Time.deltaTime;
 
-            if (currentMeltingTime >= meltingTime)
+            if (currentMeltingTime >= config.meltingTime)
             {
                 CompleteMelting();
             }
@@ -265,7 +263,7 @@ public void Interact()
     {
         isMelting = true;
         currentMeltingTime = 0f;
-        Debug.Log($"Started melting {currentOreType} with {currentFuelType}! Will complete in {meltingTime} seconds.");
+        Debug.Log($"Started melting {currentOreType} with {currentFuelType}! Will complete in {config.meltingTime} seconds.");
     }
 
     private void CompleteMelting()
@@ -445,6 +443,6 @@ public void Interact()
         }
 
         return $"{oreInfo}\n{fuelInfo}\n" +
-               $"Status: {(isMelting ? $"Melting {currentOreType}... {currentMeltingTime:F1}/{meltingTime:F1}s" : "Ready")}";
+               $"Status: {(isMelting ? $"Melting {currentOreType}... {currentMeltingTime:F1}/{config.meltingTime:F1}s" : "Ready")}";
     }
 }

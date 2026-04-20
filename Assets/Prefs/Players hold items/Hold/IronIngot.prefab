@@ -72,10 +72,10 @@ PrefabInstance:
       addedObject: {fileID: 3409994333678512928}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f93f7a7b624ae7148a543cb2659f5f80, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 7590211431362423094}
+      addedObject: {fileID: 2314728317773920899}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f93f7a7b624ae7148a543cb2659f5f80, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 2314728317773920899}
+      addedObject: {fileID: 9187601309420933961}
   m_SourcePrefab: {fileID: 100100000, guid: f93f7a7b624ae7148a543cb2659f5f80, type: 3}
 --- !u!1 &8888572482386101428 stripped
 GameObject:
@@ -131,20 +131,6 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: -5843686496590737196, guid: f93f7a7b624ae7148a543cb2659f5f80, type: 3}
---- !u!114 &7590211431362423094
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8888572482386101428}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa0f267f8c7143648b091a11f47b1c08, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Item
-  itemName: IronIngot
-  itemIcon: {fileID: 10911, guid: 0000000000000000f000000000000000, type: 0}
 --- !u!95 &2314728317773920899
 Animator:
   serializedVersion: 7
@@ -167,3 +153,18 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &9187601309420933961
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8888572482386101428}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aae95a03659666a4690a3fb84c920d62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ResourceItem
+  itemName: IronIngot
+  itemIcon: {fileID: 10911, guid: 0000000000000000f000000000000000, type: 0}
+  _resourceType: 1

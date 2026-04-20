@@ -9,19 +9,59 @@ public class ItemData
     public Sprite Icon;
     public string Description;
     public bool CanBePass;
-    private Item item;
+    public ResourceType resourceType; // Добавляем тип ресурса
+    public string prefabName; // Имя префаба для восстановления
 
+    // Конструктор из Item
     public ItemData(Item item)
     {
-        Name = item.Name;
-        Icon = item.Icon;
+        Name = item.itemName;
+        Icon = item.itemIcon;
         Description = item.Descriptions;
         CanBePass = item.CanBePass;
-        this.item = item;
+
+        // Сохраняем тип ресурса если есть
+        if (item is IResourceble resourceItem)
+        {
+            resourceType = resourceItem.resourceType;
+        }
+        else
+        {
+            resourceType = ResourceType.None;
+        }
+
+        prefabName = item.itemName;
     }
-    public Item GetItem()
+
+    // Создание Item из данных (без привязки к GameObject)
+    public Item CreateItem()
     {
-        return item;
+        // Создаем временный GameObject
+        GameObject tempObj = new GameObject($"Temp_{Name}");
+
+        Item newItem;
+
+        // Создаем правильный тип предмета
+        if (resourceType != ResourceType.None)
+        {
+            ResourceItem resourceItem = tempObj.AddComponent<ResourceItem>();
+            resourceItem.resourceType = resourceType;
+            newItem = resourceItem;
+        }
+        else
+        {
+            newItem = tempObj.AddComponent<Item>();
+        }
+
+        // Заполняем данные
+        newItem.itemName = Name;
+        newItem.itemIcon = Icon;
+        newItem.Descriptions = Description;
+        newItem.CanBePass = CanBePass;
+
+        tempObj.SetActive(false);
+
+        return newItem;
     }
 }
 
@@ -165,7 +205,7 @@ public class InventoryController : MonoBehaviour
         return inventorySlots;
     }
 
-    public void AddNewItem(Item item)
+    public bool AddNewItem(Item item)
     {
         ItemData itemData = new ItemData(item);
         UpdateItemVisibility();
@@ -186,11 +226,11 @@ public class InventoryController : MonoBehaviour
                     }
 
                     OnInventoryChanged?.Invoke();
-                    return;
+                    return true;
                 }
             }
             Debug.Log("Inventory is full!");
-            return;
+            return false;
         }
         if (item.Name == "hatchet")
         {
@@ -209,11 +249,11 @@ public class InventoryController : MonoBehaviour
                     }
 
                     OnInventoryChanged?.Invoke();
-                    return;
+                    return true;
                 }
             }
             Debug.Log("Inventory is full!");
-            return;
+            return false;
         }
 
         // First try to stack with existing items (для стакающихся предметов)
@@ -225,7 +265,7 @@ public class InventoryController : MonoBehaviour
             {
                 inventorySlots[i].currentAmount++;
                 OnInventoryChanged?.Invoke();
-                return;
+                return true;
             }
         }
 
@@ -237,11 +277,12 @@ public class InventoryController : MonoBehaviour
                 inventorySlots[i].item = itemData;
                 inventorySlots[i].currentAmount = 1;
                 OnInventoryChanged?.Invoke();
-                return;
+                return true;
             }
         }
 
         Debug.Log("Inventory is full!");
+        return false;
     }
 
     public void RemoveItem(int slotIndex)
@@ -276,13 +317,34 @@ public class InventoryController : MonoBehaviour
             RemoveItem(selectedSlotIndex);
         }
     }
+    // В InventoryController.cs
     public Item GetSelectedItem()
     {
-        if (!inventorySlots[selectedSlotIndex].IsEmpty && inventorySlots[selectedSlotIndex].item != null)
+        Debug.Log($"Selected slot index: {selectedSlotIndex}");
+
+        if (selectedSlotIndex < 0 || selectedSlotIndex >= inventorySlots.Length)
         {
-            return inventorySlots[selectedSlotIndex].item.GetItem();
+            Debug.Log("Selected slot index out of range!");
+            return null;
         }
-        return null;
+
+        if (inventorySlots[selectedSlotIndex].IsEmpty)
+        {
+            Debug.Log("Selected slot is empty!");
+            return null;
+        }
+
+        if (inventorySlots[selectedSlotIndex].item == null)
+        {
+            Debug.Log("Selected item data is null!");
+            return null;
+        }
+
+        // СОЗДАЕМ НОВЫЙ Item из данных, а не пытаемся получить старый
+        Item newItem = inventorySlots[selectedSlotIndex].item.CreateItem();
+        Debug.Log($"GetSelectedItem creating new item: {newItem?.itemName ?? "null"}");
+
+        return newItem;
     }
     // Добавьте этот метод в класс InventoryController
     public int GetSelectedSlotIndex()
