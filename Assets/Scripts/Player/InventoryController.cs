@@ -32,6 +32,8 @@ public class ItemData
 
         prefabName = item.itemName;
     }
+    public ItemData() { }
+
 
     // Создание Item из данных (без привязки к GameObject)
     public Item CreateItem()
