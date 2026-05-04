@@ -30,7 +30,7 @@ public class GameNetworkManager : MonoBehaviour
         Debug.Log($"Other player set to: {OtherPlayerEndpoint}");
 
         // Переход на геймплей
-        UnityEngine.SceneManagement.SceneManager.LoadScene("Gameplay");
+        UnityEngine.SceneManagement.SceneManager.LoadScene(1);
     }
 
     public void SetPlayerEndpoint(string ip, int port)
