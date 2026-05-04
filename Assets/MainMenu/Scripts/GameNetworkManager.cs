@@ -9,6 +9,7 @@ public class GameNetworkManager : MonoBehaviour
     public IPEndPoint PlayerEndpoint { get; private set; }
     public bool IsHost { get; set; }
     public bool IsConnected { get; private set; }
+    public bool IsConnectedToOtherPlayer => OtherPlayerEndpoint != null;
 
     void Awake()
     {
@@ -32,7 +33,15 @@ public class GameNetworkManager : MonoBehaviour
         // Переход на геймплей
         UnityEngine.SceneManagement.SceneManager.LoadScene(1);
     }
-
+    public bool CanSendResources()
+    {
+        if (!IsConnectedToOtherPlayer)
+        {
+            Debug.LogWarning("Нет подключения к другому игроку!");
+            return false;
+        }
+        return true;
+    }
     public void SetPlayerEndpoint(string ip, int port)
     {
         PlayerEndpoint = new IPEndPoint(IPAddress.Parse(ip), port);

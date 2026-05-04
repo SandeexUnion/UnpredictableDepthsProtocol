@@ -207,6 +207,22 @@ public class MinePickUpRange : MonoBehaviour, IInteractable
             Debug.Log("Инвентарь полон! Освободите место.");
         }
     }
+    public void AddNewResources(List<ItemData> newItems)
+    {
+
+        foreach (var item in newItems)
+        {
+            if (items.Count < maxCapacity)
+            {
+                items.Add(item);
+                OnItemAdded?.Invoke(item);
+            }
+            else
+            {
+                Debug.Log($"Вагонетка полна! Невозможно добавить {item.Name}");
+            }
+        }
+    }
 
     private Item CreateItemFromData(ItemData data)
     {
@@ -295,6 +311,7 @@ public class MinePickUpRange : MonoBehaviour, IInteractable
     // Метод для получения ресурсов (когда тележка приезжает)
     public void AddItems(List<ItemData> receivedItems)
     {
+        TryTakeItem();
         int addedCount = 0;
         int droppedCount = 0;
 
@@ -315,7 +332,7 @@ public class MinePickUpRange : MonoBehaviour, IInteractable
 
         Debug.Log($"Получено ресурсов: добавлено {addedCount}, выпало на землю {droppedCount}. В вагонетке: {CurrentCount}/{maxCapacity}");
     }
-
+    public void ClearAllItems() { items.Clear(); }
     private void DropItemToGround(ItemData item)
     {
         if (dropPoint == null) return;

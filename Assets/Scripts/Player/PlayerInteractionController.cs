@@ -73,6 +73,10 @@ public class PlayerInteractionController : MonoBehaviour
                     Debug.Log($"Cannot interact with {hit.collider.name} using {(selectedItem != null ? selectedItem.itemName : "hands")}");
                 }
             }
+            if (hit.collider.gameObject.tag == "Button")
+            {
+                hit.collider.gameObject.GetComponent<ResourceTransferManager>()?.SendCartResources();
+            }
         }
     }
 
